@@ -13,9 +13,18 @@ from google.auth.transport.requests import Request
 
 # Function to decode base64 and save credentials to a file
 def decode_credentials():
-    credentials_base64 = st.secrets["gdrive_credentials"]  # Read the base64 credentials from Streamlit Secrets
-    credentials_json = base64.b64decode(credentials_base64).decode("utf-8")  # Decode the base64 string back to JSON
-    with open("credentials.json", "w") as f:  # Save the decoded content to a file
+    # Get the base64-encoded credentials from Streamlit Secrets
+    credentials_base64 = st.secrets["gdrive_credentials"]
+
+    # Ensure that the base64 string is properly handled as a string, not bytes
+    if isinstance(credentials_base64, bytes):
+        credentials_json = base64.b64decode(credentials_base64).decode("utf-8")
+    else:
+        # If it's already a string, just decode it
+        credentials_json = base64.b64decode(credentials_base64.encode("utf-8")).decode("utf-8")
+
+    # Save the decoded credentials to a file
+    with open("credentials.json", "w") as f:
         f.write(credentials_json)
 
 # Define the Google Drive API scope
