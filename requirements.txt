@@ -5,3 +5,4 @@ google-auth-httplib2==0.1.0
 google-api-python-client==2.34.0
 pandas==1.4.2
 openpyxl==3.0.10
+numpy==1.21.6  # Specify a compatible version of numpy to avoid issues with pandas
