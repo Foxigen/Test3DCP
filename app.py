@@ -13,19 +13,29 @@ from google.auth.transport.requests import Request
 
 # Function to decode base64 and save credentials to a file
 def decode_credentials():
-    # Get the base64-encoded credentials from Streamlit Secrets
-    credentials_base64 = st.secrets["gdrive_credentials"]
-
-    # Ensure that the base64 string is properly handled as a string, not bytes
-    if isinstance(credentials_base64, bytes):
-        credentials_json = base64.b64decode(credentials_base64).decode("utf-8")
-    else:
-        # If it's already a string, just decode it
+    try:
+        # Retrieve the base64-encoded credentials from Streamlit Secrets
+        credentials_base64 = st.secrets["gdrive_credentials"]
+        
+        # Check if the credentials are in the correct format
+        if not isinstance(credentials_base64, str):
+            raise ValueError("The credentials are not in the expected string format.")
+        
+        # Decode the base64 string and save the credentials to a file
         credentials_json = base64.b64decode(credentials_base64.encode("utf-8")).decode("utf-8")
 
-    # Save the decoded credentials to a file
-    with open("credentials.json", "w") as f:
-        f.write(credentials_json)
+        # Write the decoded credentials to the file
+        with open("credentials.json", "w") as f:
+            f.write(credentials_json)
+        st.write("Credentials successfully decoded and saved.")
+        
+    except KeyError:
+        # Handle case where the secret is missing
+        st.error("Error: 'gdrive_credentials' secret not found. Please add it in Streamlit Secrets.")
+    except Exception as e:
+        # General error handling
+        st.error(f"An error occurred while decoding the credentials: {str(e)}")
+        raise e  # Re-raise the error after logging it
 
 # Define the Google Drive API scope
 SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
