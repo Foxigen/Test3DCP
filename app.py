@@ -14,26 +14,34 @@ from google.auth.transport.requests import Request
 # Function to decode base64 and save credentials to a file
 def decode_credentials():
     try:
-        # Retrieve the base64-encoded credentials from Streamlit Secrets
-        credentials_base64 = st.secrets["gdrive_credentials"]
+        # Access the base64-encoded credentials from Streamlit Secrets
+        credentials_base64 = st.secrets.get("gdrive_credentials", None)
         
-        # Check if the credentials are in the correct format
+        if credentials_base64 is None:
+            raise KeyError("The 'gdrive_credentials' secret is not found.")
+        
+        # Debugging: Log the type of credentials_base64
+        st.write(f"Type of credentials_base64: {type(credentials_base64)}")
+        st.write(f"First 50 characters of credentials_base64: {credentials_base64[:50]}")
+
+        # Ensure that the credentials are in string format
         if not isinstance(credentials_base64, str):
             raise ValueError("The credentials are not in the expected string format.")
-        
-        # Decode the base64 string and save the credentials to a file
+
+        # Decode the base64 string back to JSON and save it
         credentials_json = base64.b64decode(credentials_base64.encode("utf-8")).decode("utf-8")
 
-        # Write the decoded credentials to the file
+        # Save the decoded credentials to a file
         with open("credentials.json", "w") as f:
             f.write(credentials_json)
+
         st.write("Credentials successfully decoded and saved.")
         
-    except KeyError:
-        # Handle case where the secret is missing
-        st.error("Error: 'gdrive_credentials' secret not found. Please add it in Streamlit Secrets.")
+    except KeyError as e:
+        st.error(f"Error: {str(e)}")
+    except ValueError as e:
+        st.error(f"Error: {str(e)}")
     except Exception as e:
-        # General error handling
         st.error(f"An error occurred while decoding the credentials: {str(e)}")
         raise e  # Re-raise the error after logging it
 
